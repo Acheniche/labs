@@ -1,0 +1,79 @@
+#include <iostream>
+#include <cmath>
+#include <string>
+using namespace std;
+int NOD(int a, int b)
+{
+	while (a && b)
+		a > b ? a %= b : b %= a;
+	return a | b;
+}
+int nod(int n, int m)
+{
+   
+	if (m == 0)
+	{
+		return n;
+	}
+	if (n == 0)
+	{
+		return m;
+	}
+	if (n > m)
+	{
+		return nod(m, fmod(n, m));
+	}
+	else
+	{
+		return nod(n, fmod(m, n));
+	}
+}
+	int main()
+{
+		string strN, strM;
+		int n, m,a,b;
+		cout << "Enter n: "; cin >> strN; 
+		try {
+			n = stod(strN);
+		}
+		catch (exception e) {
+			cout << "n must be a number.";
+			return 1;
+		}
+		if (n < 0)
+		{
+			cout << "Error" << endl;
+			return 1;
+		}
+		cout << "Enter m: "; cin >> strM; 
+		try {
+			m = stod(strM);
+		}
+		catch (exception e) {
+			cout << "m must be a number.";
+			return 1;
+		}
+		if (m < 0)
+		{
+			cout << "Error" << endl;
+			return 1;
+		}
+		if (n==0 and m==0)
+		{
+			cout << "Does not exist" << endl;
+			return 1;
+		}
+		a = n;
+		b = m;
+		cout <<"HOD computed using a recursive function: "<< nod(n, m)<<endl;
+		cout <<"HOD computed using a usual function: "<< NOD(a,b) << endl;
+		if (nod(n, m) == NOD(a, b))
+		{
+			cout << "The results are the same";
+		}
+		else
+		{
+			cout<< "The results are not the same";
+		}
+	return 0;
+}

@@ -1,0 +1,288 @@
+#include <stdio.h>
+#include <iostream>
+#include <string>
+using namespace std;
+
+struct queue {
+
+	struct node {
+		int info;
+		node* next;
+	} *begin, * end;
+
+	void push(int info) {
+		node* t = new node;
+		t->info = info;
+		t->next = nullptr;
+		if (begin == nullptr)
+			begin = end = t;
+		else {
+			end->next = t;
+			end = t;
+		}
+	}
+
+	void push_back(int info) {
+		node* t = new node;
+		t->info = info;
+		t->next = begin;
+		if (begin == nullptr)
+			begin = end = t;
+		else {
+			begin = t;
+		}
+	}
+
+	void DeleteNegatives()
+	{
+		node* temp = new node, *temp2 = temp;
+		temp->next = begin;
+		temp->info = -999;
+
+		if (begin == end && begin->info < 0) {
+			begin = end = nullptr;
+			return;
+		}
+
+		while (temp && temp->next) {
+			if (temp->next->info < 0)
+				temp->next = temp->next->next;
+			temp = temp->next;
+		}
+
+		begin = temp2->next;
+	}
+
+
+	void peek() const {
+		node* t = begin;
+		while (t != nullptr) {
+			cout << t->info << " ";
+			t = t->next;
+		}
+	}
+
+	int pop() {
+		int out = begin->info;
+		begin = begin->next;
+		return out;
+	}
+
+	void clear() {
+		node* t;
+		while (begin != nullptr) {
+			t = begin;
+			begin = begin->next;
+			delete t;
+		}
+	}
+};
+
+//-------------------------------------------------------------
+struct comp {
+	int Data;
+	comp* next;
+};
+
+void sort_p(comp** q)
+{
+	comp* t = NULL, * t1, * r;
+	if ((*q)->next->next == NULL)return;
+	do
+	{
+		for (t1 = *q; t1->next->next != t; t1 = t1->next)
+			if (t1->next->Data > t1->next->next->Data)
+			{
+				r = t1->next->next;
+				t1->next->next = r->next;
+				r->next = t1->next;
+				t1->next = r;
+			}
+		t = t1->next;
+	} while ((*q)->next->next != t);
+}
+
+void sort_info(comp* q)
+{
+	comp* t = NULL, * t1;
+	int r;
+	do
+	{
+		for (t1 = q; t1->next != t; t1 = t1->next)
+			if (t1->Data > t1->next->Data)
+			{
+				r = t1->Data;
+				t1->Data = t1->next->Data;
+				t1->next->Data = r;
+			}
+		t = t1;
+	} while (q->next != t);
+}
+
+void idz(comp** q)
+{
+	comp* t;
+	while ((*q)->Data < 0)
+	{
+		t = *q;
+		*q = (*q)->next;
+		delete t;
+	}
+	t = *q;
+	while (t->next != NULL)
+	{
+		if (t->next->Data < 0)
+		{
+			comp* l = t->next;
+			t->next = t->next->next;
+			delete l;
+		}
+		else t = t->next;
+	}
+}
+
+
+void clear(comp** top)
+{
+	comp* q;
+	while (*top != NULL)
+	{
+		q = *top;
+		*top = (*top)->next;
+		delete q;
+	}
+}
+
+void s_push(comp** top, int D) {
+	comp* q;
+	q = new comp();
+	q->Data = D;
+	if (top == NULL) {
+		*top = q;
+	}
+	else
+	{
+		q->next = *top;
+		*top = q;
+	}
+}
+
+void s_delete_key(comp** top, int N) {
+	comp* q = *top;
+	comp* prev = NULL;
+	while (q != NULL) {
+		if (q->Data == N) {
+			if (q == *top) {
+				*top = q->next;
+				free(q);
+				q->Data = NULL;
+				q->next = NULL;
+			}
+			else
+			{
+				prev->next = q->next;
+				free(q);
+				q->Data = NULL;
+				q->next = NULL;
+			}
+		}
+		prev = q;
+		q = q->next;
+	}
+}
+
+void s_print(comp* top) {
+	comp* q = top;
+	while (q) {
+		cout << q->Data << " ";
+		q = q->next;
+	}
+}
+
+int main()
+{
+	setlocale(LC_ALL, "Russian");
+	int mode = -1;
+	cout << "Выберите:\n\t1-Стек\n\t2-1-связный список";
+	cin >> mode;
+	string command;
+	switch (mode)
+	{
+	case 1:
+	{
+		comp* top = NULL;
+		int info;
+		while (command != "quit")
+		{
+			cout << "> ";
+			getline(cin, command);
+			if (command == "push")
+			{
+				cout << "Введите информацию для ввода: ";
+				cin >> info; cin.ignore();
+				s_push(&top, info);
+			}
+			else if (command == "print")
+			{
+				s_print(top);
+				cout << endl;
+			}
+			else if (command == "delete")
+			{
+				cout << "Введите информацию для удаления: ";
+				cin >> info; cin.ignore();
+				s_delete_key(&top, info);
+			}
+			else if (command == "clear")
+			{
+				clear(&top);
+			}
+			else if (command == "sort1")
+			{
+				sort_info(top);
+			}
+			else if (command == "sort2")
+			{
+				sort_p(&top); //необходимо добавлять 1 элемент в начало, а потом удалять его (первый элемент не сортируется)
+			}
+			else if (command == "idz")
+			{
+				idz(&top);
+			}
+
+		}
+	}
+	case 2:
+	{
+		auto Queue = new queue;
+		Queue->begin = nullptr;
+		Queue->end = nullptr;
+		do {
+			cout << ">"; getline(cin, command);
+			if (command == "push") {
+				int n;
+				cout << "Введите значение: "; cin >> n; cin.ignore();
+				Queue->push(n);
+			}
+			else if (command == "print") {
+				Queue->peek();
+				cout << endl;
+			}
+			else if (command == "delete")
+				cout << Queue->pop() << endl;
+			else if (command == "pushb") {
+				int n;
+				cout << "Введите значение: "; cin >> n; cin.ignore();
+				Queue->push_back(n);
+			}
+			else if (command == "idz")
+			{
+				 Queue->DeleteNegatives();
+			}
+			else if (command == "clear")
+				Queue->clear();
+		} while (command != "quit");
+	}
+	}
+	return 0;
+}

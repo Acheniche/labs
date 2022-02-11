@@ -1,0 +1,342 @@
+#include <iostream>
+#include <fstream>
+#include <vector>
+#define person pair<int,string>
+using namespace std;
+
+struct Tree
+{
+
+
+private:
+
+	struct Node
+	{
+		int key;
+		string name;
+		Node* left, * right;
+	} *root;
+
+	Node* createLeaf(int key, string name)
+	{
+		Node* temp = new Node;
+		temp->key = key;
+		temp->name = name;
+		temp->left = temp->right = NULL;
+		return temp;
+	}
+
+	void printTree(Node* node, int level)
+	{
+		string str;
+		if (node)
+		{
+			printTree(node->right, level + 1);
+			for (int i = 0; i < level; i++)
+				str += " ";
+			cout << str << node->key << endl;
+			printTree(node->left, level + 1);
+		}
+	}
+
+	void printInfo(Node* node)
+	{
+		if (node)
+		{
+			printInfo(node->right);
+			cout << node->key << " " << node->name << endl;
+			printInfo(node->left);
+		}
+	}
+
+	void printInfoReverse(Node* node)
+	{
+		if (node)
+		{
+			printInfoReverse(node->left);
+			cout << node->key << " " << node->name << endl;
+			printInfoReverse(node->right);
+		}
+	}
+
+	static vector<person> toVector(Node* n)
+	{
+		vector<person> vect, temp;
+		if (n->left) vect = toVector(n->left);
+		vect.push_back(person(n->key, n->name));
+		if (n->right)
+		{
+			temp = toVector(n->right);
+			for (int i = 0; i < temp.size(); i++)
+				vect.push_back(temp[i]);
+		}
+		return vect;
+	}
+
+	void makeBalanced(Node*& node, int first, int last, vector<person> arr)
+	{
+		if (first == last)
+		{
+			node = NULL;
+			return;
+		}
+		int middle = (first + last) / 2;
+		node = new Node;
+		node->key = arr[middle].first;
+		node->name = arr[middle].second;
+		makeBalanced(node->left, first, middle, arr);
+		makeBalanced(node->right, middle + 1, last, arr);
+	}
+
+	void deleteBranch(int key, Node* start) {
+		Node* current = start;
+		if (current->left && current->left->key == key)
+			current->left = nullptr;
+		else if (current->left)
+			deleteBranch(key, current->left);
+		
+		if (current->right && current->right->key == key)
+			current->right = nullptr;
+		else if (current->right)
+			deleteBranch(key, current->right);
+	}
+
+public:
+
+	Tree(int key, string name)
+	{
+		root = createLeaf(key, name);
+	}
+
+	void addLeaf(int key, string name)
+	{
+		Node* prev, * temp;
+		bool found = true;
+		temp = root;
+		prev = root;
+		while (temp && found)
+		{
+			prev = temp;
+			if (key == temp->key)
+			{
+				found = false;
+				cout << "Duplicated key!" << endl;
+			}
+			else
+			{
+				if (key < temp->key)
+					temp = temp->left;
+				else
+					temp = temp->right;
+
+			}
+		}
+		if (found)
+		{
+			temp = createLeaf(key, name);
+			if (key < prev->key)
+				prev->left = temp;
+			else
+				prev->right = temp;
+		}
+	}
+
+	void removeNode(int key)
+	{
+		Node* del, * prevDel, * r, * prevR;
+		del = root;
+		prevDel = NULL;
+
+		//Searching for Node
+		while (del && del->key != key)
+		{
+			prevDel = del;
+			if (del->key > key)
+				del = del->left;
+			else
+				del = del->right;
+			if (!del)
+			{
+				cout << "Not found." << endl;
+				return;
+			}
+		}
+
+		//Replacement
+		if (del->right == NULL)
+			r = del->left;
+		else if (del->left == NULL)
+			r = del->right;
+		else
+		{
+			prevR = del;
+			r = del->left;
+			while (r->right)
+			{
+				prevR = r;
+				r = r->right;
+			}
+			if (prevR == del)
+				r->right = del->right;
+			else
+			{
+				r->right = del->right;
+				prevR->right = r->left;
+				r->left = del->left;
+			}
+		}
+		if (del == root)
+			root = r;
+		else if (del->key < prevDel->key)
+			prevDel->left = r;
+		else
+			prevDel->right = r;
+		delete del;
+	}
+
+	void printTree()
+	{
+		printTree(root, 0);
+	}
+
+	void printInfo()
+	{
+		printInfo(root);
+	}
+
+	void printInfoReverse()
+	{
+		printInfoReverse(root);
+	}
+
+	void printInfoByKey()
+	{
+		vector<person> vect = toVector(root);
+		for (int i = 0; i < vect.size(); i++)
+			cout << vect[i].first << " " << vect[i].second << endl;
+	}
+
+	void findInfo(int key) {
+		vector<person> vect = toVector(root);
+		for (auto pair : vect) {
+			if (pair.first == key)
+				cout << pair.first << " " << pair.second << endl;
+			return;
+		}
+		cout << "Not found." << endl;
+	}
+
+	Tree getBalanced()
+	{
+		Tree balanced(-1, "");
+		vector<person> vect = toVector(root);
+		balanced.makeBalanced(balanced.root, 0, vect.size(), vect);
+		return balanced;
+	}
+
+	void deleteBranch(int key)
+	{
+		deleteBranch(key, root);
+	}
+
+	Tree readFromFile(string path)
+	{
+		Tree result(-1, "");
+		ifstream fin(path);
+		vector<person> vect;
+		while (!fin.eof()) {
+			int key;
+			string info;
+			fin >> key >> info;
+			vect.emplace_back(make_pair(key, info));
+		}
+		result.makeBalanced(result.root, 0, vect.size(), vect);
+		return result;
+
+	}
+
+
+	person get(int key)
+	{
+		Node* node;
+		node = root;
+
+		//Searching for Node
+		while (node && node->key != key)
+		{
+			if (node->key > key)
+				node = node->left;
+			else
+				node = node->right;
+			if (!node)
+			{
+				cout << "Not found." << endl;
+				return person(-1, "");
+			}
+		}
+		return person(node->key, node->name);
+	}
+};
+
+int main()
+{
+	setlocale(0, "RUS");
+	Tree tree(-1, "");
+	tree = tree.readFromFile("persons.txt");
+	tree.printTree();
+	int mode;
+	herestarts:
+	cout << "Выбор:\n\t0-Сбалансировать дерево\n\t1-Добавить лист\n\t2-Поиск информации по ключу\n\t3-Удаление вершины\n\t4-Вывод информации прямым обходом\n\t5-Вывод информации обратным обходом\n\t6-Вывод информации по возрастанию ключа\n\t7-Удаление ветви\n\t8-Вывод дерева\nВаш выбор: ";
+	cin >> mode;
+	switch (mode)
+	{
+	case 0: {
+		tree = tree.getBalanced();
+		break;
+	}
+	case 1: {
+		int t; string i;
+		cout << "Введите ключ и имя: ";
+		cin >> t >> i;
+		tree.addLeaf(t, i);
+		break;
+	}
+	case 2: {
+		int t;
+		cout << "Введите ключ: ";
+		cin >> t;
+		tree.findInfo(t);
+		break;
+	}
+	case 3: {
+		int t;
+		cout << "Введите ключ: ";
+		cin >> t;
+		tree.removeNode(t);
+		break;
+	}
+	case 4:
+		tree.printInfo();
+		break;
+	case 5:
+		tree.printInfoReverse();
+		break;
+	case 6:
+		tree.printInfoByKey();
+		break;
+	case 7: {
+		int key;
+		cout << "Введите ключ: ";
+		cin >> key;
+		tree.deleteBranch(key);
+		break;
+	case 8:
+		tree.printTree();
+		break;
+	}
+	default:
+		cout << "Testers club is two blocks down" << endl;
+	}
+	goto herestarts;
+	return 0;
+}

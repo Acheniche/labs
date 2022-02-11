@@ -1,0 +1,354 @@
+#include <string>
+#include <iostream>
+#include <fstream>
+#include <vector>
+
+using namespace std;
+
+struct student
+{
+
+    string name;
+    int year, group;
+    double average, income;
+    student() {
+        name = "";
+    }
+    string text()
+    {
+        return "ФИО: " + name + "\nГод рождения: " + to_string(year) + "\nНомер группы: " + to_string(group)
+            + "\nСредний балл: " + to_string(average) + "\nДоход: " + to_string(income) + '\n';
+    }
+
+};
+
+void selecton_sort_income(student* target, int start, int finish)
+{
+    for (int i = start; i <= finish; i++)
+        for (int j = i + 1; j <= finish; j++)
+            if (target[i].income > target[j].income) {
+                student temp = target[i];
+                target[i] = target[j];
+                target[j] = temp;
+            }
+
+}
+
+void selecton_sort_average(student* target, int start, int finish)
+{
+    for (int i = start; i <= finish; i++)
+        for (int j = i + 1; j <= finish; j++)
+            if (target[i].average < target[j].average) {
+                student temp = target[i];
+                target[i] = target[j];
+                target[j] = temp;
+            }
+
+}
+
+student binary_search(vector<student> target, double income, int first, int last) {
+    if (first < last) {
+        int left = first, right = last;
+        int middle = (left + right) / 2;
+        if (target[middle].income==income) return target[middle];
+        else if (target[middle].income>income)
+            return binary_search(target, income, middle + 1, right);
+        else return binary_search(target, income, left, middle - 1);
+    }
+    if (income == target[last].income) return target[last];
+    else return student();
+}
+
+void quick_sort(student* target, int first, int last) {
+    if (first < last) {
+        int left = first, right = last;
+        int middle = target[(left + right) / 2].income;
+        do {
+            while (target[left].income > middle) left++;
+            while (target[right].income < middle) right--;
+            if (left <= right) {
+                student temp = target[left];
+                target[left] = target[right];
+                target[right] = temp;
+                left++; right--;
+            }
+
+        } while (left < right);
+        quick_sort(target, first, right);
+        quick_sort(target, left, last);
+    }
+}
+
+void quick_sort2(student* target, int first, int last) {
+    if (first < last) {
+        int left = first, right = last;
+        int middle = target[(left + right) / 2].average;
+        do {
+            while (target[left].average > middle) left++;
+            while (target[right].average < middle) right--;
+            if (left <= right) {
+                student temp = target[left];
+                target[left] = target[right];
+                target[right] = temp;
+                left++; right--;
+            }
+
+        } while (left < right);
+        quick_sort(target, first, right);
+        quick_sort(target, left, last);
+    }
+}
+
+vector<student> linear_search0(vector<student> where, string keyword0) {
+    vector <student> result;
+    for (student item : where)
+        if (item.name == keyword0)
+            result.push_back(item);
+    return result;
+}
+
+bool in(vector<int> where, int keyword) {
+    vector <student> result;
+    for (int item : where)
+        if (item == keyword)
+            return 1;
+    return 0;
+}
+
+vector<student> linear_search1(vector<student> where, int keyword) {
+    vector <student> result;
+    for (student item : where)
+        if (item.year == keyword)
+        result.push_back(item);
+    return result;
+}
+
+vector<student> linear_search2(vector<student> where, int keyword) {
+    vector <student> result;
+    for (student item : where)
+        if (item.group == keyword)
+    result.push_back(item);
+    return result;
+}
+
+vector<student> linear_search3(vector<student> where, int keyword) {
+    vector <student> result;
+    for (student item : where)
+        if (item.average == keyword)
+    result.push_back(item);
+    return result;
+}
+
+vector<student> linear_search4(vector<student> where, int keyword) {
+    vector <student> result;
+    for (student item : where)
+        if (item.income == keyword)
+    result.push_back(item);
+    return result;
+}
+
+int main() {
+    setlocale(LC_ALL, "RUS");
+    ifstream fin("students.txt");
+
+    vector<student> students;
+
+    cout << "Список студентов: " << endl;
+    int i = 1;
+
+    do
+    {
+
+        student Student;
+
+        fin >> Student.year >> Student.group >> Student.average >> Student.income;
+        getline(fin, Student.name);
+        
+        if (Student.name != "")
+        {
+
+            Student.name = Student.name.substr(1, Student.name.length() - 1);
+            students.push_back(Student);
+            cout << i << ". " << Student.name << endl;
+            i++;
+
+        }
+
+    } while (!fin.eof());
+
+    fin.close();
+
+    int mode = -1;
+
+    while (mode)
+    {
+
+        cout << "Выберите операцию:\n\t0 - Выход\n\t1 - Создание\n\t2 - Просмотр\n\t3 - Коррекция\n\t4 - Просмотр всех студентов\n\t5 - QuickSort\n\t6 - Линейный поиск \n\t7 - сортировка массива методами прямого выбора\n\t8 - двоичный поиск в отсортированном массиве\n Ваш выбор: ";
+        cin >> mode;
+
+        int number;
+        student Student, blank;
+
+        int keyword;
+        string keyword0;
+        vector<student> results;
+
+        switch (mode)
+        {
+
+        case 0:
+            cout << "Выход." << endl;
+            break;
+
+        case 1:
+            cout << "Введите имя: ";
+            cin.ignore();
+            getline(cin, Student.name);
+            cout << "Введите год рождения: ";
+            cin >> Student.year;
+            cout << "Введите номер группы: ";
+            cin >> Student.group;
+            cout << "Введите средний балл: ";
+            cin >> Student.average;
+            cout << "Введите доход: ";
+            cin >> Student.income;
+            students.push_back(Student);
+            break;
+
+        case 2:
+            cout << "Введите номер студента из списка: ";
+            cin >> number;
+            cout << students[number - 1].text();
+            break;
+
+        case 3:
+            cout << "Введите номер студента из списка: ";
+            cin >> number;
+            cout << "Введите имя: ";
+            cin.ignore();
+            getline(cin, Student.name);
+            cout << "Введите год рождения: ";
+            cin >> Student.year;
+            cout << "Введите номер группы: ";
+            cin >> Student.group;
+            cout << "Введите средний балл: ";
+            cin >> Student.average;
+            cout << "Введите доход: ";
+            cin >> Student.income;
+            students[number - 1] = Student;
+            break;
+
+        case 4:
+            for (auto student : students)
+                cout << student.text() << endl;
+            break;
+        case 5:
+        {
+            vector<student> res = vector<student>(students);
+            quick_sort(&res[0], 0, res.size() - 1);
+
+            int finish = 0;
+
+            for (int i = res.size() - 1; i >= 0; i--)
+                if (res[i].income < 2000)
+                    finish = i - 1;
+
+            quick_sort2(&res[0], 0, finish);
+
+            reverse(res.begin(), res.end());
+
+            reverse(res.end() - finish - 1, res.end());
+
+            for (auto student : res)
+                cout << student.text() << endl;
+
+            break;
+        }
+        case 6:
+            while (mode)
+            {
+                cout << "Выберите операцию:\n\t0 - Искать по имени\n\t1 - Искать по году рождения\n\t2 - Искать по группе\n\t3 - Искать по среднему баллу\n\t4 - Искать по доходу\n\t5 - Выход\n Ваш выбор: ";
+                cin >> mode;
+                switch (mode)
+                {
+                case 0:
+
+                    cout << "Введите ключевое слово: ";
+                    cin >> keyword0;
+                    results = linear_search0(students, keyword0);
+                    for (student item : results)
+                        cout << item.name << " - " << item.year << " - " << item.group << " - " << item.average << " - " << item.income << endl;
+                    break;
+
+                case 1:
+
+                    cout << "Введите ключевое слово: ";
+                    cin >> keyword;
+                    results = linear_search1(students, keyword);
+                    for (student item : results)
+                        cout << item.name << " - " << item.year << " - " << item.group << " - " << item.average << " - " << item.income << endl;
+                    break;
+
+                case 2:
+
+                    cout << "Введите ключевое слово: ";
+                    cin >> keyword;
+                    results = linear_search2(students, keyword);
+                    for (student item : results)
+                        cout << item.name << " - " << item.year << " - " << item.group << " - " << item.average << " - " << item.income << endl;
+                    break;
+
+                case 3:
+
+                    cout << "Введите ключевое слово: ";
+                    cin >> keyword;
+                    results = linear_search3(students, keyword);
+                    for (student item : results)
+                        cout << item.name << " - " << item.year << " - " << item.group << " - " << item.average << " - " << item.income << endl;
+                    break;
+
+                case 4:
+
+                    cout << "Введите ключевое слово: ";
+                    cin >> keyword;
+                    results = linear_search4(students, keyword);
+                    for (student item : results)
+                        cout << item.name << " - " << item.year << " - " << item.group << " - " << item.average << " - " << item.income << endl;
+                    break;
+
+                case 5:
+                    cout << "Выход" << endl;
+                    exit(0);
+                }
+            }
+        case 7:
+        {
+            vector<student> res1 = vector<student>(students);
+            selecton_sort_income(&res1[0], 0, res1.size() - 1);
+            int s;
+            for (s = res1.size() - 1; s >= 0, res1[s].income < 2000; s--);
+            selecton_sort_average(&res1[0], s-1, res1.size() - 1);
+            for (auto student : res1)
+                cout << student.text() << endl;
+            break;
+        }
+        case 8:
+            int vvod;
+            cout << "Введите доход: " << endl;
+            cin >> vvod;
+            vector<student> res1 = vector<student>(students);
+            selecton_sort_income(&res1[0], 0, res1.size() - 1);
+            student res = binary_search(res1,vvod, 0, res1.size() - 1);
+            if (res.name != "")
+                cout << res.text();
+            else
+                cout << "Студент не найден" << endl;
+            break;
+        }
+
+        ofstream fout("students.txt");
+        for (auto Student : students)
+            fout << Student.year << ' ' << Student.group << ' ' << Student.average << ' ' << Student.income << ' ' << Student.name << endl;
+        fout.close();
+    }
+}

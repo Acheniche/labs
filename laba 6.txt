@@ -1,0 +1,200 @@
+#include <string>
+#include <iostream>
+#include <fstream>
+#include <vector>
+
+using namespace std;
+
+struct student
+{
+
+    string name;
+    int math, physics, it, group;
+    double average;
+    student() {
+        name = "";
+    }
+    string text()
+    {
+        return "ФИО: " + name + "\nНомер группы: " + to_string(group)
+            + "\nОценки по физике, математике, информатике и химии: " + to_string(physics) + " "
+            + to_string(math) + " " + to_string(it) + " " + "\nСредний балл за семестр: "
+            + to_string(average) + '\n';
+    }
+
+};
+
+void idz(student* target, int high,int group)
+{
+    int i=0;
+    int j = 0;
+        while (target[i].average >= 8 && i < high)
+        {
+            if (target[i].group == group)
+            {
+                cout << target[i].text() << endl;
+                j++;
+            }
+            i++;
+        }
+        if (j == 0)
+        {
+            cout << "pchelov net" << endl;
+        }
+}
+
+ int partition(student* target,int low,int high)
+{
+     int pivot, i;
+    pivot = target[high].average;
+    i = (low - 1);
+    for (int j = low; j <= high - 1; j++)
+    {
+        if (target[j].average > pivot)
+        {
+            i++;
+            swap (target[i],target[j]);
+        }
+    }
+    swap (target[i + 1],target[high]);
+    return (i + 1);
+}       
+
+void quick_sort(student* target, int low, int high)
+{
+    int pi;
+    if (low < high)
+    {
+        pi = partition(target, low, high);
+        quick_sort(target, low, pi - 1);  
+        quick_sort(target, pi + 1, high);
+    }
+}
+
+int main() {
+    setlocale(LC_ALL, "RUS");
+    ifstream fin("students.txt");
+
+    vector<student> students;
+
+    cout << "Список студентов: " << endl;
+    int i = 1;
+
+    do
+    {
+
+        student Student;
+
+        fin >> Student.group >> Student.physics >> Student.math >>Student.it ;
+        Student.average = (Student.physics + Student.math + Student.it) / 3.;
+        getline(fin, Student.name);
+
+        if (Student.name != "")
+        {
+
+            Student.name = Student.name.substr(1, Student.name.length() - 1);
+            students.push_back(Student);
+            cout << i << ". " << Student.name << endl;
+            i++;
+
+        }
+
+    } while (!fin.eof());
+
+    fin.close();
+
+    int mode = -1;
+
+    while (mode)
+    {
+
+        cout << "Выберите операцию:\n\t0 - Выход\n\t1 - Создание\n\t2 - Просмотр\n\t3 - Коррекция\n\t4 - Просмотр всех студентов\n\t5-Решение индивидуального задания\n Ваш выбор: ";
+        cin >> mode;
+
+        int number;
+        student Student, blank;
+        vector<student> results;
+        switch (mode)
+        {
+
+        case 0:
+            cout << "Выход." << endl;
+            break;
+
+        case 1:
+            cout << "Введите имя: ";
+            cin.ignore();
+            getline(cin, Student.name);
+            cout << "Введите номер группы: ";
+            cin >> Student.group;
+            cout << "Введите балл по физике: ";
+            cin >> Student.physics;
+            cout << "Введите балл по математике: ";
+            cin >> Student.math;
+            cout << "Введите балл по информатике: ";
+            cin >> Student.it;
+            Student.average = (Student.physics + Student.math + Student.it) / 3.;
+            students.push_back(Student);
+            break;
+
+        case 2:
+            cout << "Введите номер студента из списка: ";
+            cin >> number;
+            cout << students[number - 1].text();
+            break;
+
+        case 3:
+            cout << "Введите номер студента из списка: ";
+            cin >> number;
+            cout << "Введите имя: ";
+            cin.ignore();
+            getline(cin, Student.name);
+            cout << "Введите номер группы: ";
+            cin >> Student.group;
+            cout << "Введите балл по физике: ";
+            cin >> Student.physics;
+            cout << "Введите балл по математике: ";
+            cin >> Student.math;
+            cout << "Введите балл по информатике: ";
+            cin >> Student.it;
+            Student.average = (Student.physics + Student.math + Student.it) / 3.;
+            students[number - 1] = Student;
+            break;
+
+        case 4:
+            for (auto student : students)
+                cout << student.text() << endl;
+            break;
+
+        case 5:
+        {
+            vector<student> res = vector<student>(students);
+            quick_sort(&res[0], 0, res.size() - 1);
+            int group;
+            cout << "Введите номер группы: ";
+            cin >> group;
+            int i;
+            bool isGroupPresent = false;
+            for (i = 0; i < res.size(); i++)
+            {
+                if (res[i].group == group)
+                    isGroupPresent = true;
+            }
+            if (!isGroupPresent)
+                cout << "Данной группы не существует!" << endl;
+
+            idz(&res[0], res.size() - 1, group);
+            break;
+        }
+        default:
+            cout << "Вы выбрали несуществующую операцию." << endl;
+            break;
+        
+        
+    }
+        ofstream fout("students.txt");
+        for (auto Student : students)
+            fout << ' ' << Student.group << ' ' << Student.physics << ' ' << Student.math << ' ' << Student.it<< ' ' << Student.name << endl;
+        fout.close();
+    }
+}
